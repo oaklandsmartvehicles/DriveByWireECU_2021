@@ -92,7 +92,7 @@ void tcpip_init_done(void *arg)
 	/* Interrupt priorities. (lowest value = highest priority) */
 	/* ISRs using FreeRTOS *FromISR APIs must have priorities below or equal to */
 	/* configLIBRARY_MAX_SYSCALL_INTERRUPT_PRIORITY. */
-	NVIC_SetPriority(GMAC_IRQn, 4);
+	NVIC_SetPriority(GMAC_IRQn, 5);
 	NVIC_EnableIRQ(GMAC_IRQn);
 	mac_async_enable(&COMMUNICATION_IO);
 

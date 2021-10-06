@@ -82,6 +82,8 @@ volatile int last_count = 0;
 
 static main_context_t ctx;
 
+SemaphoreHandle_t some_sem = NULL;
+
 
 void print_ipaddress(void)
 {
@@ -315,15 +317,10 @@ void main_task(void* p)
 
 void count_encoderA (void)
 {	
-	
-	
-	//BaseType_t task_woken =pdFALSE;
-	
-	//potential use
-	//ext_irq_disable(encoder_A)
 	ext_irq_disable(encoder_A);
 	ext_irq_disable(encoder_B);
-	//ext_irq_enable()
+	
+	BaseType_t task_woken =pdFALSE;
 	
 	
 	int encoderA_state = gpio_get_pin_level(encoder_A);
@@ -340,21 +337,24 @@ void count_encoderA (void)
 	else if(encoderB_state == 1){
 		bFlag = 1;
 	}
+
 	
+	xSemaphoreGiveFromISR(ctx.sem, &task_woken);
+	
+	
+	if (task_woken == pdTRUE)
+	portYIELD_FROM_ISR( task_woken);
+	//portYIELD_FROM_ISR(task_woken);
 	ext_irq_enable(encoder_A);
 	ext_irq_enable(encoder_B);
-	
-	//xSemaphoreGiveFromISR(ctx.sem, &task_woken);
-	
-	
-	//portYIELD_FROM_ISR(task_woken);
 
 
 }
 
 void count_encoderB (void)
 {	
-	//BaseType_t task_woken = pdFALSE;
+	BaseType_t task_woken = pdFALSE;
+	
 	
 	ext_irq_disable(encoder_A);
 	ext_irq_disable(encoder_B);
@@ -373,29 +373,24 @@ void count_encoderB (void)
 	else if(encoderA_state == 1){
 		aFlag = 1;
 	}
-
-	//xSemaphoreGiveFromISR(ctx.sem, &task_woken);
 	
-	//portYIELD_FROM_ISR(task_woken);
+	//ext_irq_disable(encoder_A);
+	//ext_irq_disable(encoder_B);
+	
+	xSemaphoreGiveFromISR(ctx.sem, &task_woken);
+	
+	//portEND_SWITCHING_ISR(task_woken);
+	if (task_woken == pdTRUE)
+	portYIELD_FROM_ISR(task_woken);
+	
+	
 	
 	ext_irq_enable(encoder_A);
 	ext_irq_enable(encoder_B);
 	
-
-	
-
-	
-
 }
 
-// Potentially include this as a RTOS task for the steering angle interrupt
-void steering_angle(void* p)
-{
-	while (1)
-	{
-		
-	}
-}
+
 
 int main(void)
 {
@@ -435,9 +430,11 @@ int main(void)
 	// We make the semaphore available
 	xSemaphoreGive(ctx.sem);
 	
-	
-
-		
+	// Interrupt priorities for encoder pins. (lowest value = highest priority) 
+	// ISRs using FreeRTOS *FromISR APIs must have priorities below or equal to 
+	// configLIBRARY_MAX_SYSCALL_INTERRUPT_PRIORITY. This version of RTOS, it is 4
+	NVIC_SetPriority(EIC_0_IRQn, 5);
+	NVIC_SetPriority(EIC_7_IRQn, 5);	
 
 	xTaskCreate(ethernet_thread,
 		"Ethernet_Task",
@@ -453,9 +450,15 @@ int main(void)
 		2,
 		NULL);
 		
+
+		
+		
+		
 	// Register the Interrupts and assign the pins to the functions	
 	ext_irq_register(PIN_PB07, count_encoderA);
 	ext_irq_register(PIN_PD00, count_encoderB);
+	
+	
 	
 		
 
