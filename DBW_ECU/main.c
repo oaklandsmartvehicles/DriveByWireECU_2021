@@ -73,6 +73,7 @@
 #define SPEED_I_GAIN (0.05 / (0.1 * 1000)) //5% duty cycle for every second we are .2 MPH off of our target.
 #define SPEED_D_GAIN 0.0
 
+// Variables for use in steering encoder ISR
 volatile int aFlag = 0;
 volatile int bFlag = 0;
 volatile int counter = 0;
@@ -80,6 +81,7 @@ volatile int last_count = 0;
 
 
 static main_context_t ctx;
+
 
 void print_ipaddress(void)
 {
@@ -289,7 +291,7 @@ void main_task(void* p)
 	while (1)
 	{
 		// Here we check and see if we may gain access to the shared context resource through he xSemaphoreTake function
-		if(xSemaphoreTake(context->sem, 5) != pdTRUE)
+		if(xSemaphoreTake(context->sem, 50) != pdTRUE)
 		{
 			printf("Failed to take IO semaphore!\n");
 			vTaskDelay(1);
@@ -310,12 +312,20 @@ void main_task(void* p)
 	}
 }
 
+
 void count_encoderA (void)
-{
+{	
+	
+	
+	//BaseType_t task_woken =pdFALSE;
+	
 	//potential use
 	//ext_irq_disable(encoder_A)
-	//ext_irq_disable(encoder_B)
+	ext_irq_disable(encoder_A);
+	ext_irq_disable(encoder_B);
 	//ext_irq_enable()
+	
+	
 	int encoderA_state = gpio_get_pin_level(encoder_A);
 	int encoderB_state = gpio_get_pin_level(encoder_B);
 	
@@ -330,16 +340,24 @@ void count_encoderA (void)
 	else if(encoderB_state == 1){
 		bFlag = 1;
 	}
-
-
 	
-	//printf("encoder A is %d ",  gpio_get_pin_level(encoder_A));
-	//printf("Encoder B is %d ", gpio_get_pin_level(encoder_B));
+	ext_irq_enable(encoder_A);
+	ext_irq_enable(encoder_B);
+	
+	//xSemaphoreGiveFromISR(ctx.sem, &task_woken);
+	
+	
+	//portYIELD_FROM_ISR(task_woken);
+
 
 }
 
 void count_encoderB (void)
 {	
+	//BaseType_t task_woken = pdFALSE;
+	
+	ext_irq_disable(encoder_A);
+	ext_irq_disable(encoder_B);
 	
 	int encoderA_state = gpio_get_pin_level(encoder_A);
 	int encoderB_state = gpio_get_pin_level(encoder_B);
@@ -350,13 +368,22 @@ void count_encoderB (void)
 		aFlag = 0;
 		bFlag = 0;
 		printf("%d ", counter);
+		
 	}
 	else if(encoderA_state == 1){
 		aFlag = 1;
 	}
 
+	//xSemaphoreGiveFromISR(ctx.sem, &task_woken);
 	
-	//printf("%d ", counter);
+	//portYIELD_FROM_ISR(task_woken);
+	
+	ext_irq_enable(encoder_A);
+	ext_irq_enable(encoder_B);
+	
+
+	
+
 	
 
 }
@@ -397,16 +424,20 @@ int main(void)
 	memset(&ctx, 0, sizeof(ctx));
 	
 	
-	ext_irq_register(PIN_PB07, count_encoderA);
-	ext_irq_register(PIN_PD00, count_encoderB);
+
+	// The idea of a Semaphore is to manage access to a shared resource, in our case its context ctx, which holds the vehicle information
+	// Context is shared between the 1-ethernet_thread task, which handles communications with the host computer and 2-main_task which controls the vehicle's functionality
 	
-	//The idea of a Semaphore is to manage access to a shared resource, in our case its context ctx, which holds the vehicle information
-	//Context is shared between the 1-ethernet_thread task, which handles communications with the host computer and 2-main_task which controls the vehicle's functionality
-	
-	//ctx.sem refers to the handle semaphore which acts as the gatekeeper of the shared resource
+	// ctx.sem refers to the handle semaphore which acts as the gatekeeper of the shared resource, a Binary Semaphore allows the shared resource to be occupied
+	// by one task at a time
 	ctx.sem = xSemaphoreCreateBinary();
 	
+	// We make the semaphore available
 	xSemaphoreGive(ctx.sem);
+	
+	
+
+		
 
 	xTaskCreate(ethernet_thread,
 		"Ethernet_Task",
@@ -422,7 +453,11 @@ int main(void)
 		2,
 		NULL);
 		
-	//xTaskCreate(
+	// Register the Interrupts and assign the pins to the functions	
+	ext_irq_register(PIN_PB07, count_encoderA);
+	ext_irq_register(PIN_PD00, count_encoderB);
+	
+		
 
 	vTaskStartScheduler();
 	

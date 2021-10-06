@@ -70,6 +70,7 @@ void encode_ethernet_outputs(EthernetOutputs* outputs, main_context_t* ctx)
 	outputs->steering_d_term = ctx->steering_controller.lastDTerm;
 }
 
+
 void ethernet_thread(void *p)
 {
 	main_context_t* ctx = (main_context_t*)p;

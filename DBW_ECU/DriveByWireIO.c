@@ -40,10 +40,8 @@ typedef union adc_val_t {
 	uint16_t ADC_Read;
 } adc_val_t;
 
-//interpolation table of steering positions[]
-const float steering_positions[] = {0, 1, 2};
-const float steering_voltages[] = {0, 1.65, 3.3};
-int steering_table_size = sizeof(steering_positions) / sizeof(float);
+
+ 
  
 
 float LinearlyInterpolate(float val_x, float left_x, float right_x, float left_y, float right_y)
@@ -53,38 +51,18 @@ float LinearlyInterpolate(float val_x, float left_x, float right_x, float left_y
 	return left_y + (percent_x * (right_y - left_y));
 }
 
-/*
-float ReadSteeringPosition()
-{
-	//TODO: determine voltage mapping between linear potentiometer and steering angle.
-	//fill out linear interpolation table above
-	if( steering_table_size < 2 )
-		return 0.0f;
 
-	//Read the steering position
-	adc_val_t adc_val;
-	adc_sync_read_channel(&ADC_0, 0, adc_val.ADC_Read_8, 2);
-	float steering_voltage = ((float)adc_val.ADC_Read / (float)0xFFF) * 3.3f;
-	for(int i = 0; i < steering_table_size; ++i)
-	{
-		//maximum value
-		if( i == steering_table_size - 1 )
-			return steering_positions[i];
+// TODO: Determine mapping of motor encoder to steering angle in radians and use interpolation utility function above for interpreting the result
+float ReadSteeringPosition(int counter)
+{	
+	static float steering_angle = 0;
+	
+	
 
-		if( steering_voltage <= steering_voltages[i+1] )
-		{
-			//minimum value
-			if( i == 0 )
-				return steering_positions[0];
 
-			//some intermediate value
-			return LinearlyInterpolate(steering_voltage, steering_voltages[i], steering_voltages[i+1], steering_positions[i], steering_positions[i+1]);
-		}
-	}
-	//if execution reaches here, then the above code is broken
-	return 0.0f;
+	return steering_angle;
 }
-*/
+
 
 void ProcessCurrentInputs(main_context_t* context)
 {
