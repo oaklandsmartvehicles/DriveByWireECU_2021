@@ -52,15 +52,10 @@ float LinearlyInterpolate(float val_x, float left_x, float right_x, float left_y
 }
 
 
-// TODO: Determine mapping of motor encoder to steering angle in radians and use interpolation utility function above for interpreting the result
-float ReadSteeringPosition(int counter)
-{	
-	static float steering_angle = 0;
-	
-	
-
-
-	return steering_angle;
+// TODO: Determine mapping of motor encoder to steering angle and use interpolation utility function above for interpreting the result
+void set_steering_angle(main_context_t* ctx, const volatile int* encoder_count)
+{
+	ctx->steering_angle = (*encoder_count)*ctx->steeringangle_to_encoder_ratio;
 }
 
 
@@ -73,9 +68,6 @@ void ProcessCurrentInputs(main_context_t* context)
 void ProcessCurrentOutputs(main_context_t* context)
 {	
 	SetPCComm(context->pc_comm_active);
-	SetDebugLED1(context->debug_led_1);
-	SetDebugLED2(context->debug_led_1);
-	SetEStopState(context->estop_indicator);
 }
 
 //non-zero values turn lights on
@@ -157,6 +149,15 @@ void SetEStopState(int active)
 {
 	gpio_set_pin_level(EStopState, active);
 }
+
+void debug_collector(main_context_t* context)
+{
+	SetDebugLED1(context->debug_led_1);
+	SetDebugLED2(context->debug_led_1);
+	SetEStopState(context->estop_indicator);
+	SetDebugSteeringAngle(context->steering_angle);
+	SetDebugVehicleSpeed(context->vehicle_speed);
+}
 //non-zero values turns on the debug LEDs.
 void SetDebugLED1(int active)
 {
@@ -165,4 +166,16 @@ void SetDebugLED1(int active)
 void SetDebugLED2(int active)
 {
 	gpio_set_pin_level(LED2, active);
+}
+
+// Print the Steering Angle
+void SetDebugSteeringAngle(float steering_angle)
+{
+	printf("%f ", steering_angle);
+}
+
+//Print the
+void SetDebugVehicleSpeed(float longitudinal_speed)
+{
+	printf("%f ", longitudinal_speed);
 }

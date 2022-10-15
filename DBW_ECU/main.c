@@ -43,6 +43,8 @@
 #include "main_context.h"
 #include "PID.h"
 
+#define DEBUG 0
+
 /* define to avoid compilation warning */
 #define LWIP_TIMEVAL_PRIVATE 0
 
@@ -52,10 +54,12 @@
 #define COME_TO_STOP_BRAKE_DUTY_CYCLE 0.5
 #define EMERGENCY_STOP_BRAKE_DUTY_CYCLE 1.0
 
+#define  MAX_STEERING_ENCODER_COUNT 350
+#define  MIN_STEERING_ENCODER_COUNT -350
 #define MAX_STEERING_ANGLE 50.0
 #define MIN_STEERING_ANGLE -50.0
 
-#define MAX_VEHICLE_SPEED 12.0
+#define MAX_VEHICLE_SPEED 5.0
 #define MIN_VEHICLE_SPEED -1.0
 
 #define MAX_STEERING_DUTY_CYCLE 1.0
@@ -65,12 +69,12 @@
 //duty cycle (0.0 - 1.0) / degrees
 #define STEERING_P_GAIN (1.0 / 30.0) //100% duty cycle at angles greater than 60 deg
 //duty cycle / degrees
-#define STEERING_I_GAIN (0.05 / (1 * 1000)) //5% duty cycle for every second we are 1 deg off.
+#define STEERING_I_GAIN 0 //5% duty cycle for every second we are 1 deg off. // Samer: Changed to zero for MPC control
 #define STEERING_D_GAIN 0.0
 
 //duty cycle (0.0 - 1.0) / m/s
 #define SPEED_P_GAIN (1.0 / 1.0) //100% duty cycle at speed errors > 2.2 MPH
-#define SPEED_I_GAIN (0.05 / (0.1 * 1000)) //5% duty cycle for every second we are .2 MPH off of our target.
+#define SPEED_I_GAIN 0 //5% duty cycle for every second we are .2 MPH off of our target.  // Samer: Changed to zero for MPC control
 #define SPEED_D_GAIN 0.0
 
 // Variables for use in steering encoder ISR
@@ -81,10 +85,10 @@ volatile int last_count = 0;
 
 
 static main_context_t ctx;
+volatile encoder_variables steering_encoder_vars;
 
-SemaphoreHandle_t some_sem = NULL;
 
-
+#ifdef DEBUG
 void print_ipaddress(void)
 {
 	static char tmp_buff[16];
@@ -94,6 +98,7 @@ void print_ipaddress(void)
 	       ipaddr_ntoa_r((const ip_addr_t *)&(TCPIP_STACK_INTERFACE_0_desc.netmask), tmp_buff, 16));
 	printf("GATEWAY_IP : %s\r\n", ipaddr_ntoa_r((const ip_addr_t *)&(TCPIP_STACK_INTERFACE_0_desc.gw), tmp_buff, 16));
 }
+#endif
 
 uint32_t GetCurrentTime()
 {
@@ -220,7 +225,7 @@ void ProcessAlgorithms(main_context_t* ctx)
 			if( SteeringTorqueFromPID > 1.0 )
 				SteeringTorqueFromPID = 1.0;
 
-			SetSteeringTorque( SteeringTorqueFromPID );
+			SetSteeringTorque(SteeringTorqueFromPID);
 		}
 	}
 	else //not in autonomous mode
@@ -286,6 +291,7 @@ void TeleOperation(main_context_t* ctx)
 	}
 }
 
+
 void main_task(void* p)
 {
 	main_context_t* context = (main_context_t*)p; 
@@ -300,11 +306,13 @@ void main_task(void* p)
 		}
 		
 		context->current_time = GetCurrentTime();
+		TeleOperation(context);
+		set_steering_angle(context, &(steering_encoder_vars.counter)); 
+		debug_collector(context);
 		/*ProcessCurrentInputs(context);
 		ProcessAlgorithms(context);
 		ProcessCurrentOutputs(context);*/
 		//TestSystems(context);
-		TeleOperation(context);
 		
 		//Here we release access to the semaphore to be used in the ethenet_thread task
 		xSemaphoreGive(context->sem);
@@ -322,17 +330,16 @@ void count_encoderA (void)
 	
 	BaseType_t task_woken =pdFALSE;
 	
-	
 	int encoderA_state = gpio_get_pin_level(encoder_A);
 	int encoderB_state = gpio_get_pin_level(encoder_B);
 	
 	if (encoderA_state == 1 && encoderB_state == 1 && aFlag == 1){
 		
-		counter--;
-		aFlag = 0;
-		bFlag = 0;
+		--steering_encoder_vars.counter;
+		steering_encoder_vars.aFlag = 0;
+		steering_encoder_vars.bFlag = 0;
 		
-		printf("%d ", counter);
+		//printf("%d ", steering_encoder_vars.counter);
 	}
 	else if(encoderB_state == 1){
 		bFlag = 1;
@@ -344,17 +351,14 @@ void count_encoderA (void)
 	
 	if (task_woken == pdTRUE)
 	portYIELD_FROM_ISR( task_woken);
-	//portYIELD_FROM_ISR(task_woken);
 	ext_irq_enable(encoder_A);
 	ext_irq_enable(encoder_B);
-
 
 }
 
 void count_encoderB (void)
 {	
 	BaseType_t task_woken = pdFALSE;
-	
 	
 	ext_irq_disable(encoder_A);
 	ext_irq_disable(encoder_B);
@@ -363,27 +367,23 @@ void count_encoderB (void)
 	int encoderB_state = gpio_get_pin_level(encoder_B);
 	
 	if (encoderA_state == 1 && encoderB_state == 1 && bFlag == 1){
-			
-		counter++;
-		aFlag = 0;
-		bFlag = 0;
-		printf("%d ", counter);
+		
+		++steering_encoder_vars.counter;
+		steering_encoder_vars.aFlag=0;
+		steering_encoder_vars.bFlag=0;
+		printf("%d ", steering_encoder_vars.counter);
 		
 	}
 	else if(encoderA_state == 1){
 		aFlag = 1;
 	}
 	
-	//ext_irq_disable(encoder_A);
-	//ext_irq_disable(encoder_B);
 	
 	xSemaphoreGiveFromISR(ctx.sem, &task_woken);
 	
 	//portEND_SWITCHING_ISR(task_woken);
 	if (task_woken == pdTRUE)
 	portYIELD_FROM_ISR(task_woken);
-	
-	
 	
 	ext_irq_enable(encoder_A);
 	ext_irq_enable(encoder_B);
@@ -397,7 +397,7 @@ int main(void)
 	/* Initializes MCU, drivers and middleware */
 	atmel_start_init();
 	
-	//Initialize PID controllers.
+	ctx.steeringangle_to_encoder_ratio = (MAX_STEERING_ANGLE - MIN_STEERING_ANGLE) / (float)(MAX_STEERING_ENCODER_COUNT - MIN_STEERING_ENCODER_COUNT);
 	ctx.steering_controller.p = STEERING_P_GAIN;
 	ctx.steering_controller.i = STEERING_I_GAIN;
 	ctx.steering_controller.d = STEERING_D_GAIN;
@@ -415,6 +415,13 @@ int main(void)
 	setInputBounds(&(ctx.speed_controller), ConvertSpeedToPIDInt(MIN_VEHICLE_SPEED), ConvertSpeedToPIDInt(MAX_VEHICLE_SPEED));
 	setOutputBounds(&(ctx.speed_controller), ConvertDutyCycleToPIDInt(MIN_ACCEL_DUTY_CYCLE), ConvertDutyCycleToPIDInt(MAX_ACCEL_DUTY_CYCLE));
 	ctx.speed_controller.getSystemTime = GetPIDTime;
+	
+	//Initialize Encoder 
+	steering_encoder_vars.aFlag=0;
+	steering_encoder_vars.bFlag=0;
+	steering_encoder_vars.counter=0;
+	steering_encoder_vars.last_count=0;
+
 	
 	memset(&ctx, 0, sizeof(ctx));
 	
@@ -435,6 +442,9 @@ int main(void)
 	// configLIBRARY_MAX_SYSCALL_INTERRUPT_PRIORITY. This version of RTOS, it is 4
 	NVIC_SetPriority(EIC_0_IRQn, 5);
 	NVIC_SetPriority(EIC_7_IRQn, 5);	
+	// Register the Interrupts and assign the pins to the functions
+	ext_irq_register(PIN_PB07, count_encoderA);
+	ext_irq_register(PIN_PD00, count_encoderB);
 
 	xTaskCreate(ethernet_thread,
 		"Ethernet_Task",
@@ -448,19 +458,7 @@ int main(void)
 		2048,
 		&ctx,
 		2,
-		NULL);
-		
-
-		
-		
-		
-	// Register the Interrupts and assign the pins to the functions	
-	ext_irq_register(PIN_PB07, count_encoderA);
-	ext_irq_register(PIN_PD00, count_encoderB);
-	
-	
-	
-		
+		NULL);	
 
 	vTaskStartScheduler();
 	

@@ -8,6 +8,7 @@
  #define DRIVEBYWIREIO_H_
 
  #include "main_context.h"
+ #include <stdio.h>
 
 void ProcessCurrentInputs(main_context_t* context);
 void ProcessCurrentOutputs(main_context_t* context);
@@ -37,8 +38,12 @@ void SetPCComm(int active);
 //non-zero values turns the EStop LED ON.
 void SetEStopState(int active);
 
+void debug_collector(main_context_t* context);
+
 //non-zero values turns on the debug LEDs.
 void SetDebugLED1(int active);
 void SetDebugLED2(int active);
+void SetDebugSteeringAngle(float steering_angle);
+void SetDebugVehicleSpeed(float longitudinal_speed);
 
 #endif /* DRIVEBYWIREIO_H_ */

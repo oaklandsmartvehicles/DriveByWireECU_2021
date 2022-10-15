@@ -49,6 +49,17 @@ typedef struct main_context_t
 	float speed_p_gain_override;
 	float speed_i_gain_override;
 	float speed_d_gain_override;
+	
+	float steeringangle_to_encoder_ratio;
 } main_context_t;
+
+typedef struct encoder_variables{
+	// Variables for use in steering encoder ISR
+	int aFlag;
+	int bFlag;
+	int counter;
+	int last_count;
+} encoder_variables;
+
 
 #endif /* MAIN_CONTEXT_H_ */
