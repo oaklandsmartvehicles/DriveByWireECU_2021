@@ -57,8 +57,8 @@ void decode_ethernet_inputs(EthernetInputs* inputs, main_context_t* ctx)
 
 }
 void encode_ethernet_outputs(EthernetOutputs* outputs, main_context_t* ctx)
-{
-	outputs->steering_angle = ctx->steering_angle * 10;
+{	
+	outputs->steering_angle = 10;
 	outputs->vehicle_speed = ctx->vehicle_speed * 100;
 	outputs->boolean_states = 0;
 	outputs->boolean_states |= ctx->estop_in > 0;
@@ -106,7 +106,7 @@ void ethernet_thread(void *p)
 	//Destination
 	memset(&ra, 0, sizeof(ra));
 	ra.sin_family 		= AF_INET;
-	ra.sin_addr.s_addr	= htonl(INADDR_BROADCAST);
+	ra.sin_addr.s_addr	= inet_addr("169.254.136.37");
 	ra.sin_port        	= htons(12089);
 	ra.sin_len			= sizeof(ra);
 
@@ -137,7 +137,7 @@ void ethernet_thread(void *p)
 		encode_ethernet_outputs(&eth_outputs, ctx);
 		
 		//Send the Data to the UDP packet
-		num_bytes_received = sendto(s_create, &eth_outputs, sizeof(eth_outputs), 0, &ra, sizeof(ra));
+		sendto(s_create, &eth_outputs, sizeof(eth_outputs), 0, (struct sockaddr*)&ra, sizeof(ra));
 	
 		//Receive incoming UDP packets
 		num_bytes_received = recv(s_create, &buffer, sizeof(buffer), MSG_DONTWAIT);

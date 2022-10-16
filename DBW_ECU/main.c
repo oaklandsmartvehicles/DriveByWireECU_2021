@@ -43,7 +43,7 @@
 #include "main_context.h"
 #include "PID.h"
 
-#define DEBUG 0
+#define DEBUG 1
 
 /* define to avoid compilation warning */
 #define LWIP_TIMEVAL_PRIVATE 0
@@ -307,8 +307,8 @@ void main_task(void* p)
 		
 		context->current_time = GetCurrentTime();
 		TeleOperation(context);
-		set_steering_angle(context, &(steering_encoder_vars.counter)); 
-		debug_collector(context);
+		//set_steering_angle(context, &(steering_encoder_vars.counter)); 
+		//debug_collector(context);
 		/*ProcessCurrentInputs(context);
 		ProcessAlgorithms(context);
 		ProcessCurrentOutputs(context);*/

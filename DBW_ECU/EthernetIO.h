@@ -49,7 +49,6 @@ typedef struct EthernetOutputs_t
 	//Encoding: value / 0.01 (m/s)
 	uint16_t vehicle_speed;
 	
-	//Encoding: value / 0.1 (degrees)
 	uint16_t steering_angle;	
 
 	//Decoding:
