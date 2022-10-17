@@ -63,7 +63,9 @@ EthernetIO.d EthernetIO.o: .././EthernetIO.c .././EthernetIO.h \
  ../lwip/lwip-1.4.0/src/include/lwip/netifapi.h \
  ../lwip/lwip-1.4.0/src/include/lwip/timers.h .././webserver_tasks.h \
  ../Config/hpl_gmac_config.h ../Config/lwip_macif_config.h \
- .././main_context.h .././PID.h
+ .././main_context.h .././PID.h \
+ c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\arm\arm-gnu-toolchain\arm-none-eabi\include\errno.h \
+ c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\arm\arm-gnu-toolchain\arm-none-eabi\include\sys\errno.h
 
 .././EthernetIO.h:
 
@@ -206,3 +208,7 @@ c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\arm\arm-gnu-toolchain\arm-no
 .././main_context.h:
 
 .././PID.h:
+
+c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\arm\arm-gnu-toolchain\arm-none-eabi\include\errno.h:
+
+c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\arm\arm-gnu-toolchain\arm-none-eabi\include\sys\errno.h:

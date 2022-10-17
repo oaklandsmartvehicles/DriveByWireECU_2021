@@ -301,7 +301,7 @@ void main_task(void* p)
 		// Here we check and see if we may gain access to the shared context resource through he xSemaphoreTake function
 		if(xSemaphoreTake(context->sem, 50) != pdTRUE)
 		{
-			printf("Failed to take IO semaphore!\n");
+			//printf("Failed to take IO semaphore!\n");
 			vTaskDelay(1);
 		}
 		

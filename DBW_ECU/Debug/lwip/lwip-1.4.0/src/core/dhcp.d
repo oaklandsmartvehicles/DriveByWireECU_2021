@@ -34,7 +34,25 @@ lwip/lwip-1.4.0/src/core/dhcp.d lwip/lwip-1.4.0/src/core/dhcp.o: \
  c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\arm\arm-gnu-toolchain\arm-none-eabi\include\sys\stdio.h \
  c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\arm\arm-gnu-toolchain\lib\gcc\arm-none-eabi\6.3.1\include\stdint.h \
  c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\arm\arm-gnu-toolchain\arm-none-eabi\include\stdint.h \
- c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\arm\arm-gnu-toolchain\arm-none-eabi\include\sys\_intsup.h
+ c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\arm\arm-gnu-toolchain\arm-none-eabi\include\sys\_intsup.h \
+ ../lwip/lwip-1.4.0/src/include/lwip/stats.h \
+ ../lwip/lwip-1.4.0/src/include/lwip/mem.h \
+ ../lwip/lwip-1.4.0/src/include/lwip/memp.h \
+ ../lwip/lwip-1.4.0/src/include/lwip/memp_std.h \
+ ../lwip/lwip-1.4.0/src/include/lwip/udp.h \
+ ../lwip/lwip-1.4.0/src/include/lwip/pbuf.h \
+ ../lwip/lwip-1.4.0/src/include/lwip/err.h \
+ ../lwip/lwip-1.4.0/src/include/lwip/netif.h \
+ ../lwip/lwip-1.4.0/src/include/ipv4/lwip/ip_addr.h \
+ ../lwip/lwip-1.4.0/src/include/lwip/def.h \
+ ../lwip/lwip-1.4.0/src/include/ipv4/lwip/ip.h \
+ ../lwip/lwip-1.4.0/src/include/lwip/dhcp.h \
+ ../lwip/lwip-1.4.0/src/include/ipv4/lwip/autoip.h \
+ ../lwip/lwip-1.4.0/src/include/lwip/dns.h \
+ ../lwip/lwip-1.4.0/src/include/netif/etharp.h \
+ c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\arm\arm-gnu-toolchain\arm-none-eabi\include\string.h \
+ c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\arm\arm-gnu-toolchain\arm-none-eabi\include\xlocale.h \
+ c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\arm\arm-gnu-toolchain\arm-none-eabi\include\sys\string.h
 
 ../lwip/lwip-1.4.0/src/include/lwip/opt.h:
 
@@ -107,3 +125,39 @@ c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\arm\arm-gnu-toolchain\lib\gc
 c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\arm\arm-gnu-toolchain\arm-none-eabi\include\stdint.h:
 
 c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\arm\arm-gnu-toolchain\arm-none-eabi\include\sys\_intsup.h:
+
+../lwip/lwip-1.4.0/src/include/lwip/stats.h:
+
+../lwip/lwip-1.4.0/src/include/lwip/mem.h:
+
+../lwip/lwip-1.4.0/src/include/lwip/memp.h:
+
+../lwip/lwip-1.4.0/src/include/lwip/memp_std.h:
+
+../lwip/lwip-1.4.0/src/include/lwip/udp.h:
+
+../lwip/lwip-1.4.0/src/include/lwip/pbuf.h:
+
+../lwip/lwip-1.4.0/src/include/lwip/err.h:
+
+../lwip/lwip-1.4.0/src/include/lwip/netif.h:
+
+../lwip/lwip-1.4.0/src/include/ipv4/lwip/ip_addr.h:
+
+../lwip/lwip-1.4.0/src/include/lwip/def.h:
+
+../lwip/lwip-1.4.0/src/include/ipv4/lwip/ip.h:
+
+../lwip/lwip-1.4.0/src/include/lwip/dhcp.h:
+
+../lwip/lwip-1.4.0/src/include/ipv4/lwip/autoip.h:
+
+../lwip/lwip-1.4.0/src/include/lwip/dns.h:
+
+../lwip/lwip-1.4.0/src/include/netif/etharp.h:
+
+c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\arm\arm-gnu-toolchain\arm-none-eabi\include\string.h:
+
+c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\arm\arm-gnu-toolchain\arm-none-eabi\include\xlocale.h:
+
+c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\arm\arm-gnu-toolchain\arm-none-eabi\include\sys\string.h:

@@ -11,8 +11,9 @@
 #include "lwip/tcpip.h"
 #include "webserver_tasks.h"
 #include "main_context.h"
+#include <errno.h>
 
-#define ECU_IP "192.168.2.100"
+#define ECU_IP "192.168.1.100"
 #define ECU_PORT "1234"
 #define BROADCAST_PORT "1235"
 #define PC_IP "255.255.255.255"
@@ -106,15 +107,15 @@ void ethernet_thread(void *p)
 	//Destination
 	memset(&ra, 0, sizeof(ra));
 	ra.sin_family 		= AF_INET;
-	ra.sin_addr.s_addr	= inet_addr("169.254.136.37");
-	ra.sin_port        	= htons(12089);
+	ra.sin_addr.s_addr	= htonl(INADDR_BROADCAST);
+	ra.sin_port        	= htons(12090);
 	ra.sin_len			= sizeof(ra);
 
 	//Source
 	memset(&sa, 0, sizeof(sa));
 	sa.sin_family		= AF_INET;
 	sa.sin_addr.s_addr	= htonl(INADDR_ANY);
-	sa.sin_port			= htons(12090);
+	sa.sin_port			= htons(12089);
 	sa.sin_len			= sizeof(sa);
 
 	/* bind the connection to port */
@@ -123,6 +124,7 @@ void ethernet_thread(void *p)
 		LWIP_DEBUGF(LWIP_DBG_ON, ("Bind error=%d\n", socket_check));
 		return;
 	}
+	
 
     uint8_t buffer[64];
 	while(1)
@@ -138,11 +140,21 @@ void ethernet_thread(void *p)
 		
 		//Send the Data to the UDP packet
 		sendto(s_create, &eth_outputs, sizeof(eth_outputs), 0, (struct sockaddr*)&ra, sizeof(ra));
-	
+
+
 		//Receive incoming UDP packets
 		num_bytes_received = recv(s_create, &buffer, sizeof(buffer), MSG_DONTWAIT);
 		
-		//Process the received packets if any are received 
+		//num_bytes_received = recvfrom(s_create, &buffer, sizeof(buffer), MSG_WAITALL, (struct sockaddr*)&sa ,sizeof(sa));
+		
+		if (num_bytes_received == -1)
+		{	
+			fprintf(stderr, "recv: %s (%d)\n, Number of bytes received: %d\n", strerror(errno), errno, num_bytes_received);
+			//fprintf("Number of bytes received: %d\n", num_bytes_received);
+		}
+		
+		
+		//Process the received packets if any are received
 		if(num_bytes_received > 0)
 		{
 			memcpy(&eth_inputs.boolean_commands, buffer, num_bytes_received);
@@ -151,6 +163,7 @@ void ethernet_thread(void *p)
 			//Decoding inputs coming from the host computer
 			decode_ethernet_inputs(&eth_inputs, ctx);
 		}
+		
 
 		xSemaphoreGive(ctx->sem);
 		vTaskDelay(TRANSMIT_INTERVAL);

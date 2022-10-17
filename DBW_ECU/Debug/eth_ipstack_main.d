@@ -204,6 +204,7 @@ eth_ipstack_main.d eth_ipstack_main.o: .././eth_ipstack_main.c \
  ../lwip/lwip-1.4.0/src/include/netif/etharp.h \
  ../lwip/lwip-1.4.0/src/include/ipv4/lwip/ip.h \
  ../lwip/lwip-1.4.0/src/include/lwip/dhcp.h \
+ ../lwip/lwip-1.4.0/src/include/lwip/udp.h \
  c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\arm\arm-gnu-toolchain\arm-none-eabi\include\string.h \
  c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\arm\arm-gnu-toolchain\arm-none-eabi\include\xlocale.h \
  c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\arm\arm-gnu-toolchain\arm-none-eabi\include\sys\string.h
@@ -713,6 +714,8 @@ c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\arm\arm-gnu-toolchain\arm-no
 ../lwip/lwip-1.4.0/src/include/ipv4/lwip/ip.h:
 
 ../lwip/lwip-1.4.0/src/include/lwip/dhcp.h:
+
+../lwip/lwip-1.4.0/src/include/lwip/udp.h:
 
 c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\arm\arm-gnu-toolchain\arm-none-eabi\include\string.h:
 

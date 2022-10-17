@@ -47,6 +47,7 @@ lwip/lwip-1.4.0/src/netif/etharp.d lwip/lwip-1.4.0/src/netif/etharp.o: \
  ../lwip/lwip-1.4.0/src/include/lwip/memp_std.h \
  ../lwip/lwip-1.4.0/src/include/lwip/snmp.h \
  ../lwip/lwip-1.4.0/src/include/lwip/dhcp.h \
+ ../lwip/lwip-1.4.0/src/include/lwip/udp.h \
  ../lwip/lwip-1.4.0/src/include/ipv4/lwip/autoip.h \
  ../lwip/lwip-1.4.0/src/include/netif/etharp.h \
  c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\arm\arm-gnu-toolchain\arm-none-eabi\include\string.h \
@@ -148,6 +149,8 @@ c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\arm\arm-gnu-toolchain\arm-no
 ../lwip/lwip-1.4.0/src/include/lwip/snmp.h:
 
 ../lwip/lwip-1.4.0/src/include/lwip/dhcp.h:
+
+../lwip/lwip-1.4.0/src/include/lwip/udp.h:
 
 ../lwip/lwip-1.4.0/src/include/ipv4/lwip/autoip.h:
 
