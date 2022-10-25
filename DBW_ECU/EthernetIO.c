@@ -13,11 +13,10 @@
 #include "main_context.h"
 #include <errno.h>
 
-#define ECU_IP "192.168.1.100"
-#define ECU_PORT "1234"
-#define BROADCAST_PORT "1235"
-#define PC_IP "255.255.255.255"
-#define PC_PORT "1236"
+#define ECU_IP "192.168.2.100"
+#define ECU_PORT "12089"
+#define PC_IP "192.168.2.200"
+#define PC_PORT "12090"
 #define SUBNET_MASK "255.255.255.0"
 
 #define TRANSMIT_INTERVAL 10 //milliseconds
@@ -103,11 +102,17 @@ void ethernet_thread(void *p)
 
 	//The setsockopt() function provides an application program with the means to control socket behavior.
 	setsockopt(s_create, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, &opt, sizeof(opt));
+	
+	// IMPORTANT: When using a direct connection to the PC, please configure the ethernet settings for the port on the PC as such:
+	// IP: 192.168.2.200
+	// Subnet: 255.255.255.0
+	// Gateway: 192.168.2.1
 
 	//Destination
 	memset(&ra, 0, sizeof(ra));
 	ra.sin_family 		= AF_INET;
-	ra.sin_addr.s_addr	= htonl(INADDR_BROADCAST);
+	ra.sin_addr.s_addr	= inet_addr("192.168.2.200");
+	//ra.sin_addr.s_addr	= htonl(INADDR_BROADCAST);
 	ra.sin_port        	= htons(12090);
 	ra.sin_len			= sizeof(ra);
 
@@ -145,19 +150,18 @@ void ethernet_thread(void *p)
 		//Receive incoming UDP packets
 		num_bytes_received = recv(s_create, &buffer, sizeof(buffer), MSG_DONTWAIT);
 		
-		//num_bytes_received = recvfrom(s_create, &buffer, sizeof(buffer), MSG_WAITALL, (struct sockaddr*)&sa ,sizeof(sa));
+		//num_bytes_received = recvfrom(s_create, &buffer, sizeof(buffer), MSG_DONTWAIT, (struct sockaddr*)&sa ,sizeof(sa));
 		
 		if (num_bytes_received == -1)
 		{	
-			fprintf(stderr, "recv: %s (%d)\n, Number of bytes received: %d\n", strerror(errno), errno, num_bytes_received);
+			//fprintf(stderr, "recv: %s (%d)\n, Number of bytes received: %d\n", strerror(errno), errno, num_bytes_received);
 			//fprintf("Number of bytes received: %d\n", num_bytes_received);
 		}
-		
 		
 		//Process the received packets if any are received
 		if(num_bytes_received > 0)
 		{
-			memcpy(&eth_inputs.boolean_commands, buffer, num_bytes_received);
+			memcpy(&eth_inputs, buffer, num_bytes_received);
 			ctx->last_eth_input_rx_time = xTaskGetTickCount();
 			
 			//Decoding inputs coming from the host computer

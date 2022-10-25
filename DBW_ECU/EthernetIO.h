@@ -28,6 +28,8 @@ typedef struct EthernetInputs_t
 	
 	//Decoding: RAW * 0.1 (degrees)
 	uint16_t steering_angle_commanded;
+	
+	
 
 	//Decoding: RAW * 0.000001
 	//Range: ~ 0.000001 - 1000
